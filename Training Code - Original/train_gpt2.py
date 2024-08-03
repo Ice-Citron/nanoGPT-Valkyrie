@@ -222,7 +222,7 @@ class DataLoaderLite:
         # get the shard filenames
         data_root = "edu_fineweb10B"
         shards = os.listdir(data_root)
-        shards = [s for s in shards if split in s]
+        shards = [s for s in shards if split in s] # listing out shards file in the data_root dir
         shards = sorted(shards)
         shards = [os.path.join(data_root, s) for s in shards]
         self.shards = shards
