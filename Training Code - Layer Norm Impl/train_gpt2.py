@@ -122,9 +122,19 @@ class LayerNorm(nn.Module):
             if self.bias is not None:
                 init.zeros_(self.bias)
 
-    def forward(self, input: Tensor) -> Tensor:
-        return layer_norm(input, self.normalized_shape, self.weight, self.bias, self.eps) # originally from functional class --> F.layer_norm
+    def forward(self, x: Tensor) -> Tensor:
+        """Forward pass of LayerNorm."""
+        mean = x.mean(dim=-1, keepdim=True)
+        mean_x2 = torch.square(x).mean(dim=-1, keepdim=True)
+        var = mean_x2 - torch.square(mean)
 
+        x_norm = (x - mean) / torch.sqrt(var + self.eps)
+
+        if self.elementwise_affine:
+            x_norm = self.weight * x_norm + self.bias
+
+        return x_norm
+        
     def extra_repr(self) -> str:
         return '{normalized_shape}, eps={eps}, elementwise_affine={elementwise_affine}'.format(**self.__dict__)
 
