@@ -597,9 +597,9 @@ if __name__ == "__main__":
     # parser.add_argument("--input_bin", type=str, default="./edu_fineweb10B/edufineweb_train_??????.npy", help="input .bin to train on")
     # parser.add_argument("--input_val_bin", type=str, default="./edu_fineweb10B/edufineweb_val_??????.npy", help="input .bin to eval validation loss on")
     parser.add_argument("--output_dir", type=str, default="", help="output directory to which to write logs and checkpoints")
-    parser.add_argument("--model", type=str, default="gpt2", help="gpt2|gpt2-medium|gpt2-large|gpt2-xl|d12|d24|d36|d48")
+    parser.add_argument("--model", type=str, default="d12", help="gpt2|gpt2-medium|gpt2-large|gpt2-xl|d12|d24|d36|d48")
     # token layout for each step of the optimization
-    parser.add_argument("--batch_size", type=int, default=64, help="batch size, in units of #batch dimensions")
+    parser.add_argument("--batch_size", type=int, default=4, help="batch size, in units of #batch dimensions")
     parser.add_argument("--sequence_length", type=int, default=1024, help="sequence length")
     parser.add_argument("--total_batch_size", type=int, default=524288, help="total desired batch size, in units of #tokens")
     # workload (number of steps)

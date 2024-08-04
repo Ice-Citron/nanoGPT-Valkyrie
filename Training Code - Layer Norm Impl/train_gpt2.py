@@ -262,17 +262,20 @@ class DataLoaderLite:
 
 
 def setup_logging(project_name):
-    wandb.init(project=project_name, config=args, dir="./../")
-    run_name = wandb.run.name
-    wandb_id = wandb.run.id
-    
-    return tb_writer, run_name, wandb_id
+    if master_process:
+        wandb.init(project=project_name, config=args, dir="./../")
+        run_name = wandb.run.name
+        wandb_id = wandb.run.id
+    else:
+        run_name = ""
+        wandb_id = 0 
 
-def log_metrics(step, metrics, loss_accum, norm, dt, tokens_per_sec):
-    wandb.log(metrics)
-    print(f"step {step:5d} | loss: {loss_accum.item():.6f} | lr {lr:.4e} | norm: {norm:.4f} | dt: {dt*1000:.2f}ms | tok/sec: {tokens_per_sec:.2f}")
-    with open(log_file, "a") as f:
-        f.write(f"{step} train {loss_accum.item():.6f}\n")
+    return run_name, wandb_id
+
+def log_metrics(metrics):
+    if master_process:
+        wandb.log(metrics)
+
 
 # -----------------------------------------------------------------------------
 # helper function for HellaSwag eval
@@ -354,13 +357,13 @@ config = {
 }
 
 args = Namespace(**config)
-samples_per_step = accelerator.state.num_processes * args.train_batch_size
-set_seed(args.seed)
+samples_per_step = torch.cuda.device_count() * args.batch_size
 
 # Logging
-logger, run_name, wandb_id = setup_logging(project_name.split("/")[1])
-print(f"Weights and Biases run name: {run_name}")
-print(f"Weights and Biases run id  : {wandb_id}")
+if master_process:
+    run_name, wandb_id = setup_logging(project_name.split("/")[1])
+    print(f"Weights and Biases run name: {run_name}")
+    print(f"Weights and Biases run id  : {wandb_id}")
 
 # -----------------------------------------------------------------------------
 
@@ -447,7 +450,7 @@ for step in range(max_steps):
         if ddp:
             dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
         if master_process:
-            wandb.log({"validation loss": val_loss_accum})
+            log_metrics({"validation loss": val_loss_accum})
             print(f"validation loss: {val_loss_accum.item():.4f}")
             with open(log_file, "a") as f:
                 f.write(f"{step} val {val_loss_accum.item():.4f}\n")
@@ -493,7 +496,7 @@ for step in range(max_steps):
             num_correct_norm = num_correct_norm.item()
         acc_norm = num_correct_norm / num_total
         if master_process:
-            wandb.log({"hella swag": acc_norm, "hella correct norm": num_correct_norm, "hella num total": num_total})
+            log_metrics({"hella swag": acc_norm, "hella correct norm": num_correct_norm, "hella num total": num_total})
             print(f"HellaSwag accuracy: {num_correct_norm}/{num_total}={acc_norm:.4f}")
             with open(log_file, "a") as f:
                 f.write(f"{step} hella {acc_norm:.4f}\n")
@@ -568,13 +571,15 @@ for step in range(max_steps):
     tokens_processed = train_loader.B * train_loader.T * grad_accum_steps * ddp_world_size
     tokens_per_sec = tokens_processed / dt
     if master_process:
-        metrics = {
+        log_metrics({
             "lr": lr, # get_lr()
             "samples": step * samples_per_step,
             "steps": step,
-            "loss/train": loss.item(),
-        }
-        log_metrics(step, metrics, loss_accum, norm, dt, tokens_per_sec)
+            "loss/train": loss_accum.item(),
+        })
+        print(f"step {step:5d} | loss: {loss_accum.item():.6f} | lr {lr:.4e} | norm: {norm:.4f} | dt: {dt*1000:.2f}ms | tok/sec: {tokens_per_sec:.2f}")
+        with open(log_file, "a") as f:
+            f.write(f"{step} train {loss_accum.item():.6f}\n")
 
 if ddp:
     destroy_process_group()
