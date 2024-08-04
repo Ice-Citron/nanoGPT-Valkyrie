@@ -66,19 +66,85 @@ class MLP(nn.Module):
         x = self.c_proj(x)
         return x
 
+
+# -----------------------------------------------------------------------------
+
+# trail 1 imports
+from torch.nn.parameter import Parameter
+from torch import Tensor, Size
+from typing import Union, List, Tuple, Optional
+from torch.nn import init
+import numbers
+
+#trail 2 imports
+from torch.overrides import (has_torch_function_variadic, handle_torch_function)
+
+# Functional class
+def layer_norm(input: Tensor, normalized_shape: List[int], weight: Optional[Tensor] = None, bias: Optional[Tensor] = None, eps: float = 1e-5) -> Tensor:
+    if has_torch_function_variadic(input, weight, bias):
+        return handle_torch_function(layer_norm, (input, weight, bias), input, normalized_shape, weight=weight, bias=bias, eps=eps)
+    return torch.layer_norm(input, normalized_shape, weight, bias, eps, torch.backends.cudnn.enabled)
+
+
+_shape_t = Union[int, List[int], Size]
+
+class LayerNorm(nn.Module):
+
+    __constants__ = ['normalized_shape', 'eps', 'elementwise_affine']
+    normalized_shape: Tuple[int, ...]
+    eps: float
+    elementwise_affine: bool
+
+    def __init__(self, normalized_shape: _shape_t, eps: float = 1e-5, elementwise_affine: bool = True, bias: bool = True, device=None, dtype=None) -> None:
+        factory_kwargs = {'device': device, 'dtype': dtype}
+        super().__init__()
+        if isinstance(normalized_shape, numbers.Integral):
+            # mypy error: incompatible types in assignment
+            normalized_shape = (normalized_shape,)  # type: ignore[assignment]
+        self.normalized_shape = tuple(normalized_shape)  # type: ignore[arg-type]
+        self.eps = eps
+        self.elementwise_affine = elementwise_affine
+        if self.elementwise_affine:
+            self.weight = Parameter(torch.empty(self.normalized_shape, **factory_kwargs))
+            if bias:
+                self.bias = Parameter(torch.empty(self.normalized_shape, **factory_kwargs))
+            else:
+                self.register_parameter('bias', None)
+        else:
+            self.register_parameter('weight', None)
+            self.register_parameter('bias', None)
+
+        self.reset_parameters()
+
+    def reset_parameters(self) -> None:
+        if self.elementwise_affine:
+            init.ones_(self.weight)
+            if self.bias is not None:
+                init.zeros_(self.bias)
+
+    def forward(self, input: Tensor) -> Tensor:
+        return layer_norm(input, self.normalized_shape, self.weight, self.bias, self.eps) # originally from functional class --> F.layer_norm
+
+    def extra_repr(self) -> str:
+        return '{normalized_shape}, eps={eps}, elementwise_affine={elementwise_affine}'.format(**self.__dict__)
+
+# -----------------------------------------------------------------------------
+
+
 class Block(nn.Module):
 
     def __init__(self, config):
         super().__init__()
-        self.ln_1 = nn.LayerNorm(config.n_embd)
+        self.ln_1 = LayerNorm(config.n_embd)
         self.attn = CausalSelfAttention(config)
-        self.ln_2 = nn.LayerNorm(config.n_embd)
+        self.ln_2 = LayerNorm(config.n_embd)
         self.mlp = MLP(config)
 
     def forward(self, x):
         x = x + self.attn(self.ln_1(x))
         x = x + self.mlp(self.ln_2(x))
         return x
+    
 
 @dataclass
 class GPTConfig:
@@ -87,6 +153,7 @@ class GPTConfig:
     n_layer: int = 12 # number of layers
     n_head: int = 12 # number of heads
     n_embd: int = 768 # embedding dimension
+
 
 class GPT(nn.Module):
 
@@ -98,7 +165,7 @@ class GPT(nn.Module):
             wte = nn.Embedding(config.vocab_size, config.n_embd),
             wpe = nn.Embedding(config.block_size, config.n_embd),
             h = nn.ModuleList([Block(config) for _ in range(config.n_layer)]),
-            ln_f = nn.LayerNorm(config.n_embd),
+            ln_f = LayerNorm(config.n_embd),
         ))
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
 
@@ -450,7 +517,7 @@ for step in range(max_steps):
         if ddp:
             dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
         if master_process:
-            log_metrics({"validation loss": val_loss_accum})
+            log_metrics({"loss/validation": val_loss_accum})
             print(f"validation loss: {val_loss_accum.item():.4f}")
             with open(log_file, "a") as f:
                 f.write(f"{step} val {val_loss_accum.item():.4f}\n")
@@ -496,7 +563,7 @@ for step in range(max_steps):
             num_correct_norm = num_correct_norm.item()
         acc_norm = num_correct_norm / num_total
         if master_process:
-            log_metrics({"hella swag": acc_norm, "hella correct norm": num_correct_norm, "hella num total": num_total})
+            log_metrics({"hella/swag": acc_norm, "hella/correct norm": num_correct_norm, "hella/num total": num_total})
             print(f"HellaSwag accuracy: {num_correct_norm}/{num_total}={acc_norm:.4f}")
             with open(log_file, "a") as f:
                 f.write(f"{step} hella {acc_norm:.4f}\n")
@@ -576,6 +643,10 @@ for step in range(max_steps):
             "samples": step * samples_per_step,
             "steps": step,
             "loss/train": loss_accum.item(),
+            # file specific addition
+            "global gradient norm": norm,
+            "dt": dt,
+            "tok per sec": tokens_per_sec
         })
         print(f"step {step:5d} | loss: {loss_accum.item():.6f} | lr {lr:.4e} | norm: {norm:.4f} | dt: {dt*1000:.2f}ms | tok/sec: {tokens_per_sec:.2f}")
         with open(log_file, "a") as f:
