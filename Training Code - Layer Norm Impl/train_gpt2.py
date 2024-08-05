@@ -68,22 +68,11 @@ class MLP(nn.Module):
 
 
 # -----------------------------------------------------------------------------
-
-# trail 1 imports
 from torch.nn.parameter import Parameter
 from torch import Tensor, Size
 from typing import Union, List, Tuple, Optional
 from torch.nn import init
 import numbers
-
-#trail 2 imports
-from torch.overrides import (has_torch_function_variadic, handle_torch_function)
-
-# Functional class
-def layer_norm(input: Tensor, normalized_shape: List[int], weight: Optional[Tensor] = None, bias: Optional[Tensor] = None, eps: float = 1e-5) -> Tensor:
-    if has_torch_function_variadic(input, weight, bias):
-        return handle_torch_function(layer_norm, (input, weight, bias), input, normalized_shape, weight=weight, bias=bias, eps=eps)
-    return torch.layer_norm(input, normalized_shape, weight, bias, eps, torch.backends.cudnn.enabled)
 
 
 _shape_t = Union[int, List[int], Size]
@@ -105,20 +94,20 @@ class LayerNorm(nn.Module):
         self.eps = eps
         self.elementwise_affine = elementwise_affine
         if self.elementwise_affine:
-            self.weight = Parameter(torch.empty(self.normalized_shape, **factory_kwargs))
+            self.gain = Parameter(torch.empty(self.normalized_shape, **factory_kwargs))
             if bias:
                 self.bias = Parameter(torch.empty(self.normalized_shape, **factory_kwargs))
             else:
                 self.register_parameter('bias', None)
         else:
-            self.register_parameter('weight', None)
+            self.register_parameter('gain', None)
             self.register_parameter('bias', None)
 
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
         if self.elementwise_affine:
-            init.ones_(self.weight)
+            init.ones_(self.gain)
             if self.bias is not None:
                 init.zeros_(self.bias)
 
@@ -131,7 +120,7 @@ class LayerNorm(nn.Module):
         x_norm = (x - mean) / torch.sqrt(var + self.eps)
 
         if self.elementwise_affine:
-            x_norm = self.weight * x_norm + self.bias
+            x_norm = self.gain * x_norm + self.bias # changed name of weight parameter, to gain parameter to concur with naming convention
 
         return x_norm
         
