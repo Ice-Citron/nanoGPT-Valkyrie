@@ -13,3 +13,6 @@
 ---
 7/8/2024
 - LN - Normalization Code Explained = https://chatgpt.com/c/74b5719a-aa96-435d-85c1-be079b7964e7
+---
+8/8/2024
+- LN - Understanding Batch Normalization = https://chatgpt.com/c/a9b218dc-221f-4f6c-8fa2-9b6c78c07ab5
