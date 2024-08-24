@@ -114,9 +114,8 @@ class LayerNorm(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         """Forward pass of LayerNorm."""
         mean = x.mean(dim=-1, keepdim=True)
-        mean_x2 = torch.square(x).mean(dim=-1, keepdim=True)
-        var = mean_x2 - torch.square(mean)
-
+        var = torch.var(x, dim=-1, keepdim=True, unbiased=False) # mean_x2 = torch.square(x).mean(dim=-1, keepdim=True) // alternate code for varience calculation, faster torch.compile
+                                                                 # var = mean_x2 - torch.square(mean)
         x_norm = (x - mean) / torch.sqrt(var + self.eps)
 
         if self.elementwise_affine:
