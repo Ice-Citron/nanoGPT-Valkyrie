@@ -14,5 +14,6 @@ Hence, I have decided to do the next best thing, which I had spent 4 hours, for 
 # nanoGPT-Valkyrie
 https://www.youtube.com/watch?v=mP4dqV3jQZ4&t=1204s
 24:50 to 1:00:00
+
 https://www.youtube.com/watch?v=NQfp2KT9kEU
 0:00 to 43:26
