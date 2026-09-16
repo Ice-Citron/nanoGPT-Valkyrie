@@ -27,8 +27,9 @@ The work covers distributed training, custom normalisation code, checkpoint reco
 
 - [Read the paper](Extended%20Essay%20-%20Transformers.pdf)
 - [Backup copy on Google Drive](https://drive.google.com/file/d/1dlhTgv4-A2cCYSsL00An_XpfGpg1DyWy/view)
-- [Training code](Training_Code/)
-- [Evaluation and statistics](evaluation/statistics/)
+- [Training code](pretraining/)
+- [Task evaluation](evaluation/)
+- [Statistical analysis](analysis/statistics/)
 - [Model checkpoints](#model-checkpoints)
 
 ## Video walkthrough
@@ -176,17 +177,17 @@ The paper explains the evaluation method, results, and study limits. Its appendi
 
 | Location | Contents |
 |---|---|
-| [Paper](Extended%20Essay%20-%20Transformers.pdf) | Research question, methods, results, references, and appendices |
-| [Training code](Training_Code/) | Pre-training code for LN, RMSN, PN, and the experimental PLN variant |
-| [Task evaluation](evaluation/tasks/) | Fine-tuning notebooks, generated outputs, and evaluation code |
-| [Statistical analysis](evaluation/statistics/) | Assessment records, metric results, statistical tests, and plots |
-| [Visualisation](Visualisation/) | Training curves, gradient analysis, and ablation scripts |
-| [Research experiments](research/experiments/) | Normalisation tests, distributed experiments, tokenizer trials, and model conversion |
-| [Research notes](research/notes/) | Technical notes |
-| [Reference implementations](research/references/) | Reference code used during the research |
-| [Paper drafts](research/drafts/) | Earlier drafts and supporting material |
-| [Side notes](research/side-notes/) | Additional notebook material |
-| [README figures](docs/images/) | Figures used in this README |
+| [Paper](Extended%20Essay%20-%20Transformers.pdf) | Final paper, references, and appendices |
+| [Pre-training](pretraining/) | LayerNorm, RMSNorm, PowerNorm, and PowerLayerNorm implementations |
+| [Ablation](ablation/) | Scripts that remove selected normalisation layers |
+| [Evaluation](evaluation/) | Task fine-tuning, text generation, metrics, and GPT-4o assessment |
+| [Analysis](analysis/) | Statistical tests, training curves, gradients, and attention analysis |
+| [Results](results/) | Saved outputs, scores, CSV exports, statistical results, and figures |
+| [Experiments](experiments/) | Dated implementation tests and intermediate experiments |
+| [Research notes](docs/notes/) | Research notes, observations, and original cloud commands |
+| [References](references/) | Reference implementations and source notebooks |
+| [Paper drafts](docs/paper-drafts/) | Earlier paper versions and outline |
+| [README figures](docs/images/) | Ablation diagram and BillSum loss plot |
 | [Earlier projects](related/) | Three related repositories included as Git submodules |
 
 The paper describes the final methods and conclusions.
@@ -235,9 +236,9 @@ Each submodule records a specific commit from its source repository.
 
 | Project | Focus |
 |---|---|
-| [GPTesla-Code-Generation](related/GPTesla-Code-Generation/) | Python code generation, custom tokenization, and distributed training |
-| [GPT-Foundations](related/GPT-Foundations/) | Character-level Transformers and tokenizer experiments |
-| [GPT2-Reproduction](related/GPT2-Reproduction/) | GPT-2 reproduction and the initial custom LayerNorm implementation |
+| [GPTesla-Code-Generation](https://github.com/Ice-Citron/GPTesla-Code-Generation) | Python code generation, custom tokenization, and distributed training |
+| [GPT-Foundations](https://github.com/Ice-Citron/GPT-Foundations) | Character-level Transformers and tokenizer experiments |
+| [GPT2-Reproduction](https://github.com/Ice-Citron/GPT2-Reproduction) | GPT-2 reproduction and the initial custom LayerNorm implementation |
 
 These submodules are optional for access to the paper and final research files.
 
