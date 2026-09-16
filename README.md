@@ -6,6 +6,15 @@ Research code, model checkpoints, and experimental results for my IB Computer Sc
 
 I pre-trained GPT-2 models with 124 million parameters on FineWeb-Edu. I compared normalisation methods, tested changes to their placement, and evaluated the models on three tasks.
 
+![Normalisation ablation variants](docs/images/ablation-variants.png)
+
+*Four normalisation layouts, applied to LayerNorm and RMSNorm models.
+The final normalisation layer remains in every variant.*
+
+![BillSum fine-tuning loss](docs/images/billsum-loss.png)
+
+*The eight variants converge to similar BillSum training loss values.*
+
 The work covers distributed training, custom normalisation code, checkpoint recovery, fine-tuning, and statistical analysis.
 
 **Research period:** August 2024–January 2025  
@@ -60,6 +69,11 @@ The study created variants of the pretrained LayerNorm and RMSNorm models.
 
 The ablation code replaces selected normalisation layers with an identity function. This function returns its input without a change.
 
+![Normalisation ablation variants](docs/images/ablation-variants.png)
+
+*Figure 15 from the paper. The diagram shows normalisation positions
+within the transformer blocks.*
+
 | Variant | Normalisation before attention | Normalisation before the feedforward network |
 |---|---|---|
 | `baseModel` | Retained | Retained |
@@ -77,6 +91,32 @@ The reported results show:
 - The experiments showed no clear reduction in fine-tuning time.
 
 These experiments examine changes to pretrained models. They do not establish that every ablated configuration can train successfully from random initialisation.
+
+### Fine-tuning loss
+
+The eight LayerNorm and RMSNorm variants converge to similar training
+loss values on BillSum.
+
+![BillSum fine-tuning loss](docs/images/billsum-loss.png)
+
+![SQuAD fine-tuning loss](Visualisation/CSV%20-%20Training%20Curves%20ADA/SQuAD%20%26%20BillSum/SQuAD%20Graphs/SQuAD_all_loss.png)
+
+*The SQuAD loss curves show greater separation between the variants
+than the BillSum curves.*
+
+### Gradient norms during fine-tuning
+
+The following plots compare gradient norms across the eight model
+variants during task fine-tuning.
+
+![BillSum gradient norms](Visualisation/CSV%20-%20Training%20Curves%20ADA/SQuAD%20%26%20BillSum/BillSum%20Graphs/Billsum_all_grad.png)
+
+*BillSum gradient norms decrease sharply during the initial steps.*
+
+![SQuAD gradient norms](Visualisation/CSV%20-%20Training%20Curves%20ADA/SQuAD%20%26%20BillSum/SQuAD%20Graphs/SQuAD_all_grad.png)
+
+*SQuAD gradient norms show persistent fluctuations and differences
+between variants.*
 
 ## Model and training setup
 
