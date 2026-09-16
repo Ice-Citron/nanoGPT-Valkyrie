@@ -1,4 +1,4 @@
-# GPT-Valkyrie — GPT-2 Normalisation Study
+# nanoGPT-Valkyrie — GPT-2 Normalisation Study
 
 Research code, model checkpoints, and experimental results for my IB Computer Science Extended Essay:
 
