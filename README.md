@@ -22,14 +22,15 @@ The work covers distributed training, custom normalisation code, checkpoint reco
 
 - [Read the paper](Extended%20Essay%20-%20Transformers.pdf)
 - [Backup copy on Google Drive](https://drive.google.com/file/d/1dlhTgv4-A2cCYSsL00An_XpfGpg1DyWy/view)
-- [Training code](GPT-Valkyrie/)
-- [Evaluation and statistics](Metrics%20-%20Statistical%20Analysis/)
+- [Training code](pretraining/)
+- [Evaluation and statistics](analysis/statistics/)
 - [Model checkpoints](#model-checkpoints)
 
 ## Video walkthrough
 
 I recorded this walkthrough for Hack Club. It covers the repository,
 the data download, and the GPU setup.
+The video shows the original directory layout.
 
 [Watch the GPT-Valkyrie walkthrough — 8:18 to 24:53](https://www.youtube.com/watch?v=mP4dqV3jQZ4&t=498s)
 
@@ -99,7 +100,7 @@ loss values on BillSum.
 
 ![BillSum fine-tuning loss](docs/images/billsum-loss.png)
 
-![SQuAD fine-tuning loss](Visualisation/CSV%20-%20Training%20Curves%20ADA/SQuAD%20%26%20BillSum/SQuAD%20Graphs/SQuAD_all_loss.png)
+![SQuAD fine-tuning loss](results/training-curves/squad/figures/SQuAD_all_loss.png)
 
 *The SQuAD loss curves show greater separation between the variants
 than the BillSum curves.*
@@ -109,11 +110,11 @@ than the BillSum curves.*
 The following plots compare gradient norms across the eight model
 variants during task fine-tuning.
 
-![BillSum gradient norms](Visualisation/CSV%20-%20Training%20Curves%20ADA/SQuAD%20%26%20BillSum/BillSum%20Graphs/Billsum_all_grad.png)
+![BillSum gradient norms](results/training-curves/billsum/figures/Billsum_all_grad.png)
 
 *BillSum gradient norms decrease sharply during the initial steps.*
 
-![SQuAD gradient norms](Visualisation/CSV%20-%20Training%20Curves%20ADA/SQuAD%20%26%20BillSum/SQuAD%20Graphs/SQuAD_all_grad.png)
+![SQuAD gradient norms](results/training-curves/squad/figures/SQuAD_all_grad.png)
 
 *SQuAD gradient norms show persistent fluctuations and differences
 between variants.*
@@ -170,19 +171,24 @@ The paper explains the evaluation method, results, and study limits. Its appendi
 
 | Location | Contents |
 |---|---|
-| [Paper](Extended%20Essay%20-%20Transformers.pdf) | Research question, methods, results, references, and appendices |
-| [GPT-Valkyrie](GPT-Valkyrie/) | Pre-training code for LN, RMSN, PN, and the experimental PLN variant |
-| [Math Testing](Math%20Testing/) | Normalisation tests, distributed experiments, tokenizer trials, and model conversion |
-| [Metrics](Metrics/) | Fine-tuning notebooks, generated outputs, and evaluation code |
-| [Metrics - Statistical Analysis](Metrics%20-%20Statistical%20Analysis/) | Assessment records, metric results, statistical tests, and plots |
-| [Visualisation](Visualisation/) | Training curves, gradient analysis, and ablation scripts |
-| [Original - EE F](Original%20-%20EE%20F/) | Reference implementations used during the research |
-| [Notes](Notes/) | Technical notes |
-| [Write-up](Write-up/) | Paper drafts and supporting material |
+| [Paper](Extended%20Essay%20-%20Transformers.pdf) | Final paper, references, and appendices |
+| [Pre-training](pretraining/) | LayerNorm, RMSNorm, PowerNorm, and PowerLayerNorm implementations |
+| [Ablation](ablation/) | Scripts that remove selected normalisation layers |
+| [Evaluation](evaluation/) | Task fine-tuning, text generation, metrics, and GPT-4o assessment |
+| [Analysis](analysis/) | Statistical tests, training curves, gradients, and attention analysis |
+| [Results](results/) | Saved outputs, scores, CSV exports, statistical results, and figures |
+| [Experiments](experiments/) | Dated implementation tests and intermediate experiments |
+| [References](references/) | Reference implementations and source notebooks |
+| [Notes](docs/notes/) | Research notes and original cloud commands |
+| [Paper drafts](docs/paper-drafts/) | Earlier paper versions and outline |
+| [Earlier projects](related/) | Three related repositories, included as Git submodules |
 
-The training directories contain notebooks with the original environment and launch configuration.
+The paper describes the final methods and conclusions.
+The experiments directory also preserves intermediate tests.
 
-The repository preserves intermediate experiments as well as the final study. The paper provides the main account of the final methods and conclusions.
+The source files retain their original experiment paths and environment settings.
+Some paths refer to the previous layout or original cloud machines.
+Update these paths before you run the scripts or notebooks.
 
 ### Additional experiments
 
@@ -218,11 +224,26 @@ Separate repositories hold the pre-training run files:
 
 ## Related projects
 
-These repositories document the earlier stages of this work:
+These repositories contain the earlier stages of this work.
+Each Git submodule records a specific commit from its source repository.
 
-- [GPTesla-Code-Generation](https://github.com/Ice-Citron/GPTesla-Code-Generation): a Python code model with a custom tokenizer and Accelerate training.
-- [GPT-Foundations](https://github.com/Ice-Citron/GPT-Foundations): GPT and tokenizer exercises from Karpathy’s courses, with personal implementations and notes.
-- [GPT2-Reproduction](https://github.com/Ice-Citron/GPT2-Reproduction): the GPT-2 reproduction, experiment logs, and initial custom LayerNorm implementation.
+| Project | Local directory | Scope |
+|---|---|---|
+| [GPTesla-Code-Generation](https://github.com/Ice-Citron/GPTesla-Code-Generation) | `related/GPTesla-Code-Generation/` | Python code model, custom tokenizer, and Accelerate training |
+| [GPT-Foundations](https://github.com/Ice-Citron/GPT-Foundations) | `related/GPT-Foundations/` | GPT and tokenizer exercises, personal implementations, and notes |
+| [GPT2-Reproduction](https://github.com/Ice-Citron/GPT2-Reproduction) | `related/GPT2-Reproduction/` | GPT-2 reproduction, experiment logs, and initial custom LayerNorm implementation |
+
+To download this repository with all three submodules:
+
+```bash
+git clone --recurse-submodules https://github.com/Ice-Citron/nanoGPT-Valkyrie.git
+```
+
+For an existing clone:
+
+```bash
+git submodule update --init --recursive
+```
 
 ## Background and acknowledgements
 

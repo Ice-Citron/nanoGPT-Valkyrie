@@ -1,0 +1,9 @@
+[submodule "GPT-Foundations"]
+	path = related/GPT-Foundations
+	url = https://github.com/Ice-Citron/GPT-Foundations
+[submodule "GPT2-Reproduction"]
+	path = related/GPT2-Reproduction
+	url = https://github.com/Ice-Citron/GPT2-Reproduction
+[submodule "GPTesla-Code-Generation"]
+	path = related/GPTesla-Code-Generation
+	url = https://github.com/Ice-Citron/GPTesla-Code-Generation
